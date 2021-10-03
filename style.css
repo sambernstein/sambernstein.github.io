@@ -1,0 +1,104 @@
+* {margin:0;}
+
+html {
+  box-sizing: border-box;
+}
+
+body { 
+  /*position: relative;*/
+/*  background: rgb(37,38,30);*/
+  height: 100%;
+}
+
+a:hover
+{
+  background: rgb(193,148,255);
+  background: linear-gradient(0.33turn, #c194ff, #fc7a7a);
+}
+
+/*content
+{
+  font-family: Open Sans, Helvetica, sans-serif;
+  background-color: #505050;
+  padding:30px;
+  word-wrap: break-word;
+}*/
+
+#golCanvas {
+  background: rgb(100,100,100);
+  z-index: -1;
+}
+
+main
+{
+  position: absolute;
+  width: 780px;
+  height: 400px;
+
+  font-family: Open Sans, Helvetica, sans-serif;
+  /*background-color: #505050;*/
+  padding: 30px;
+  word-wrap: break-word;
+
+  max-width: 780px;
+
+  top: 30px;
+  left: 90px;
+}
+
+h1 {
+  padding: 12px 0;
+}
+p {
+  padding: 7px;
+}
+
+img#me {
+  width: 300px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+#subtitle {
+  position: absolute;
+  /*padding: 8px;  */
+}
+
+#nav {
+  /*top: 30px;*/
+  position: absolute;
+  float: right;
+  background-color: #ecd4c8;
+  padding: 18px;
+  border: 4px white;
+  border-radius: 8px;
+  margin: 0 0 10px 10px;
+}
+
+nav h3:first-child {
+  margin-top: 0;
+}
+
+nav h3 {
+  margin: 8px 0;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+nav a {
+  display: inline-block;
+  margin: 1px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+
+
+
+
+
