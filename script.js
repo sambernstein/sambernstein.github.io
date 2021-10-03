@@ -134,9 +134,9 @@ var canvas = document.getElementById("golCanvas");
 
 	initMatrix();
 	placeContent();
-	placeGlider(Math.floor(x*0.9), Math.floor(y*0.9));
+	placeGlider(Math.floor(x*0.8), Math.floor(y*0.8));
 
-	setInterval(nextStep, 30);
+	setInterval(nextStep, 3000);
 
 	document.addEventListener("click", toggleCell);
 	window.addEventListener('resize', placeContent, true);
