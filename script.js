@@ -58,20 +58,20 @@ var canvas = document.getElementById("golCanvas");
 
 			    var xMinus = xVal - 1;
 			    if (xMinus < 0) {
-			    	xMinus = x - 1;
+			    	xMinus = x - 2;
 			    }
 			    var yMinus = yVal - 1;
 			    if (yMinus < 0) {
-			    	yMinus = y - 1;
+			    	yMinus = y - 2;
 			    }
 
 			    var xPlus = xVal + 1;
 			    if (xPlus >= x) {
-			    	xPlus = 0;
+			    	xPlus = 1;
 			    }
 			    var yPlus = yVal + 1;
 			    if (yPlus >= y) {
-			    	yPlus = 0;
+			    	yPlus = 1;
 			    }
 
 			    neighbourSum += myGol[xMinus][yVal];
@@ -113,6 +113,13 @@ var canvas = document.getElementById("golCanvas");
 		initiateCell(x_pos + 1, y_pos + 2);
 		initiateCell(x_pos + 2, y_pos + 1);
 	}
+	function placeUpGlider(x_pos, y_pos) {
+		initiateCell(x_pos, y_pos);
+		initiateCell(x_pos, y_pos - 2);
+		initiateCell(x_pos - 1, y_pos - 1);
+		initiateCell(x_pos - 1, y_pos - 2);
+		initiateCell(x_pos - 2, y_pos - 1);
+	}
 
 	function placeContent() {
 		placeNav();
@@ -134,7 +141,10 @@ var canvas = document.getElementById("golCanvas");
 
 	initMatrix();
 	placeContent();
+	placeGlider(Math.floor(x*0.8), Math.floor(y*0.2));
 	placeGlider(Math.floor(x*0.8), Math.floor(y*0.8));
+	// placeUpGlider(Math.floor(x*0.4), Math.floor(y*0.1));
+
 
 	setInterval(nextStep, 3000);
 
