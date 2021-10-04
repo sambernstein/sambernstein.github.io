@@ -13,7 +13,7 @@ body {
 a:hover
 {
   background: rgb(193,148,255);
-  background: linear-gradient(0.33turn, #c194ff, #fc7a7a);
+  background: linear-gradient(90deg, rgba(96,89,245,1) 0%, rgba(24,121,9,0.4962359943977591) 51%, rgba(0,241,255,1) 100%);
 }
 
 /*content

@@ -7,6 +7,8 @@ var canvas = document.getElementById("golCanvas");
 	var LEN = 14;
 	var x = Math.floor(WIDTH/LEN) + 2;
 	var y = HEIGHT/LEN + 2;
+	var cells = x * y;
+	var randomFactor = 0.7;
 	var myGol;
 	var golTmp;
 			
@@ -92,6 +94,13 @@ var canvas = document.getElementById("golCanvas");
 						setCell(xVal, yVal)
 					}
 				}
+
+				var randVal = Math.random() * cells;
+				if (randVal < randomFactor) {
+					setCell(xVal, yVal);
+				}
+
+
 		    }
 	    }
 	    myGol = golTmp.slice();   
