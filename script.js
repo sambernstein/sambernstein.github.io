@@ -5,6 +5,8 @@ var canvas = document.getElementById("golCanvas");
 	var HEIGHT = canvas.height;
 	var ctx = canvas.getContext("2d");
 	var LEN = 14;
+	var deadColor = "rgb(100,100,100)";
+	var liveColor = "rgb(255,255,255)";
 	var x = Math.floor(WIDTH/LEN) + 2;
 	var y = HEIGHT/LEN + 2;
 	var cells = x * y;
@@ -38,20 +40,26 @@ var canvas = document.getElementById("golCanvas");
 	function draw(x,y){
 		ctx.fillRect(LEN*(x-1),LEN*(y-1),LEN,LEN);
 	}
-	function setCell(xVal, yVal) {
-		golTmp[xVal][yVal] = 1;
-		ctx.fillStyle = "rgb(255,255,255)";
+	function setCellLive(xVal, yVal) {
+		setCell(xVal, yVal, 1, liveColor);
+	}
+	function setCellDead(xVal, yVal) {
+		setCell(xVal, yVal, 0, deadColor)
+	}
+	function setCell(xVal, yVal, live, color) {
+		golTmp[xVal][yVal] = live;
+		ctx.fillStyle = color;
 		draw(xVal,yVal);
 	}
 	function initiateCell(xVal, yVal) {
-		setCell(xVal, yVal);
+		setCellLive(xVal, yVal);
 		myGol[xVal][yVal] = 1;
 	}
 	function nextStep(){
 		// reset tempArray
 		initTmp();
 		// reset canvas
-		ctx.fillStyle = "rgb(100,100,100)";
+		ctx.fillStyle = deadColor;
 		ctx.fillRect(0,0,WIDTH,HEIGHT);
 
 	    for(var xVal = 0; xVal<x; xVal++){
@@ -85,19 +93,19 @@ var canvas = document.getElementById("golCanvas");
 			    neighbourSum += myGol[xPlus][yMinus];
 			    neighbourSum += myGol[xPlus][yPlus];
 			    
-			    if(myGol[xVal][yVal] == 1) {
-				    if(neighbourSum == 2 || neighbourSum == 3){
-				    	setCell(xVal, yVal);
+			    if(myGol[xVal][yVal] === 1) {
+				    if(neighbourSum === 2 || neighbourSum === 3){
+				    	setCellLive(xVal, yVal);
 				    }
 				} else {
-					if(neighbourSum == 3) {
-						setCell(xVal, yVal)
+					if(neighbourSum === 3) {
+						setCellLive(xVal, yVal)
 					}
 				}
 
 				var randVal = Math.random() * cells;
 				if (randVal < randomFactor) {
-					setCell(xVal, yVal);
+					setCellLive(xVal, yVal);
 				}
 
 
@@ -106,13 +114,30 @@ var canvas = document.getElementById("golCanvas");
 	    myGol = golTmp.slice();   
 	}
 	function toggleCell(event) {
-		 console.log("x coords: " + event.clientX + ", y coords: " + event.clientY);
-		 var x_pos = event.clientX;
-		 var y_pos = event.clientY;
-		 var xVal = Math.floor((x_pos + LEN)/LEN);
-		 var yVal = Math.floor((y_pos + LEN)/LEN);
-		 console.log("xVal: " + xVal + ", yVal: " + yVal);
-		 setCell(xVal, yVal);
+		delayEditedEvolution();
+		edited_mode = true;
+		var x_pos = event.clientX;
+		var y_pos = event.clientY;
+		var xVal = Math.floor((x_pos + LEN)/LEN);
+		var yVal = Math.floor((y_pos + LEN)/LEN);
+		if (golTmp[xVal][yVal] === 1) {
+			setCellDead(xVal, yVal);
+		} else {
+			setCellLive(xVal, yVal);
+		}
+	}
+	function delayEditedEvolution() {
+		if (typeof evolve !== 'undefined') {
+			clearInterval(evolve);
+		}
+		if (typeof editDelay !== 'undefined') {
+			clearTimeout(editDelay);
+		}
+		editDelay = setTimeout(startEditedEvolution, edit_delay_t);
+	}
+
+	function startEditedEvolution() {
+		evolve = setInterval(nextStep, edited_t);
 	}
 
 	function placeGlider(x_pos, y_pos) {
@@ -129,7 +154,6 @@ var canvas = document.getElementById("golCanvas");
 		initiateCell(x_pos - 1, y_pos - 2);
 		initiateCell(x_pos - 2, y_pos - 1);
 	}
-
 	function placeContent() {
 		placeNav();
 		placeSubtitle();
@@ -147,16 +171,18 @@ var canvas = document.getElementById("golCanvas");
 		d.style.left = left+'px';
 		d.style.top = top+'px';
 	}
-
+	var edited_mode = false;
+	var editDelay;
+	var edit_delay_t = 2000;
+	var page_load_t = 3000;
+	var edited_t = 150;
 	initMatrix();
 	placeContent();
 	placeGlider(Math.floor(x*0.8), Math.floor(y*0.2));
 	placeGlider(Math.floor(x*0.8), Math.floor(y*0.8));
 	// placeUpGlider(Math.floor(x*0.4), Math.floor(y*0.1));
 
-
-	setInterval(nextStep, 3000);
-
+	var evolve = setInterval(nextStep, page_load_t);
 	document.addEventListener("click", toggleCell);
 	window.addEventListener('resize', placeContent, true);
 
