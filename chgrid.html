@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Turn every tile green</title>
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+    }
+    .grid div {
+      border: 1px solid black;
+      width: 30px;
+      height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <script>
+    const grid = document.querySelector('.grid');
+    const numRows = 10;
+    const numCols = 10;
+
+    // Create tiles
+    for (let i = 0; i < numRows; i++) {
+      for (let j = 0; j < numCols; j++) {
+        const tile = document.createElement('div');
+        grid.appendChild(tile);
+      }
+    }
+
+    const tiles = document.querySelectorAll('.grid div');
+
+    // Add click event listeners to each tile
+    tiles.forEach((tile) => {
+      tile.addEventListener('click', toggleColor);
+    });
+
+    // Initialize colors of tiles
+    tiles.forEach((tile) => {
+      tile.style.backgroundColor = getRandomColor();
+    });
+
+    function toggleColor(e) {
+      const tile = e.target;
+      const tileIndex = Array.from(tiles).indexOf(tile);
+      const row = Math.floor(tileIndex / numCols);
+      const col = tileIndex % numCols;
+
+      // Toggle color of clicked tile
+      tile.style.backgroundColor =
+        tile.style.backgroundColor === 'red' ? 'green' : 'red';
+
+      // Toggle color of surrounding tiles
+      const surroundingTiles = [
+        tiles[tileIndex - numCols], // above
+        tiles[tileIndex + numCols], // below
+        tiles[tileIndex - 1], // left
+        tiles[tileIndex + 1], // right
+      ];
+      surroundingTiles.forEach((tile) => {
+        if (tile)
+          tile.style.backgroundColor =
+            tile.style.backgroundColor === 'red' ? 'green' : 'red';
+      });
+    }
+
+    function getRandomColor() {
+      const colors = ['green', 'red'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+  </script>
+</body>
+</html>
