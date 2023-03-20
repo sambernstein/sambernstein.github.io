@@ -1,75 +1,173 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Turn every tile green</title>
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      grid-template-rows: repeat(10, 1fr);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Grid Game</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
     }
-    .grid div {
-      border: 1px solid black;
-      width: 30px;
-      height: 30px;
+    .container {
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+
+        align-items: center;
     }
-  </style>
+    .grid-container {
+        order: 1; /* Put this div first */
+        flex: 0 0 auto; /* Don't allow it to grow or shrink */
+        display: inline-grid;
+        grid-template-columns: repeat(10, 52.5px);
+        grid-template-rows: repeat(10, 52.5px);
+        grid-gap: 2px;
+    }
+    .tile {
+        width: 52.5px;
+        height: 52.5px;
+        cursor: pointer;
+    }
+    .green {
+        background-color: green;
+    }
+    .red {
+        background-color: red;
+    }
+    #message {
+        order: 2;
+        flex: 1 0 100%;
+        font-size: 28px;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+    #new-game-button {
+        position: absolute;
+        left: 540px;
+        top: 18px;
+
+        margin-left: 20px;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 40px 20px;
+        border: 2px solid black;
+        background-color: white;
+        height: 525px;
+
+    }
+    #instructions {
+        position: absolute;
+        left: 700px;
+        top: 0px;
+        margin-top: 15px;
+        margin-left: 15px;
+        width: 400px;
+    }
+    #instr-text {
+        font-size: 18px;
+    }
+    #scramble-count {
+        position: absolute;
+        left: 700px;
+        top: 300px;
+
+        margin-left: 10px;
+        font-size: 18px;
+        width: 80px;
+        height: 30px;
+    }
+
+
+</style>
 </head>
 <body>
-  <div class="grid"></div>
-  <script>
-    const grid = document.querySelector('.grid');
-    const numRows = 10;
-    const numCols = 10;
+    <div class="container">
+        <div class="grid-container" id="grid-container"></div>
+        <div id="message">You won!</div>
+        <button id="new-game-button">New Game</button>
+        <div id="instructions">
+            <div id="instr-text"><p>
+                        Instructions: The goal of this game is to get all tiles to be green. Do this by clicking on tiles to toggle the color of the 3x3 grid around each tile from red to green or green to red. Clicking "New Game" re-scrambles the board from the solved (all green) state by randomly robo-clicking on as many  tiles as you set in the number box.
+                        <br><br>
+                        Higher numbers in the number box gives more difficult and scrambled boards!
+                    </p>
+            </div>
+    </div>
+        <input type="number" id="scramble-count" placeholder="Scramble count" min="0" value="1">
+    </div>
+    <script>
+        const container = document.getElementById('grid-container');
+        const message = document.getElementById('message');
+        const newGameButton = document.getElementById('new-game-button');
+        const scrambleCountInput = document.getElementById('scramble-count');
+        const gridSize = 10;
+        let tiles = [];
 
-    // Create tiles
-    for (let i = 0; i < numRows; i++) {
-      for (let j = 0; j < numCols; j++) {
-        const tile = document.createElement('div');
-        grid.appendChild(tile);
-      }
-    }
+        function initializeTiles() {
+            container.innerHTML = '';
+            for (let i = 0; i < gridSize; i++) {
+                tiles[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile green';
+                    tile.onclick = () => toggleTiles(i, j);
+                    tiles[i][j] = tile;
+                    container.appendChild(tile);
+                }
+            }
+        }
 
-    const tiles = document.querySelectorAll('.grid div');
+        function scrambleTiles() {
+            const count = parseInt(scrambleCountInput.value);
+            for (let i = 0; i < count; i++) {
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+                toggleTiles(row, col);
+            }
+        }
 
-    // Add click event listeners to each tile
-    tiles.forEach((tile) => {
-      tile.addEventListener('click', toggleColor);
-    });
+        function toggleTiles(row, col) {
+            for (let i = row - 1; i <= row + 1; i++) {
+                for (let j = col - 1; j <= col + 1; j++) {
+                    if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
+                        tiles[i][j].classList.toggle('green');
+                        tiles[i][j].classList.toggle('red');
+                    }
+                }
+            }
+            checkWinCondition();
+        }
 
-    // Initialize colors of tiles
-    tiles.forEach((tile) => {
-      tile.style.backgroundColor = getRandomColor();
-    });
+        function checkWinCondition() {
+            let allGreen = true;
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (!tiles[i][j].classList.contains('green')) {
+                        allGreen = false;
+                        break;
+                    }
+                }
+                if (!allGreen) {
+                    break;
+                }
+            }
+            if (allGreen) {
+                message.style.display = 'block';
+            } else {
+                message.style.display = 'none';
+            }
+        }
+        function newGame() {
+            initializeTiles();
+            scrambleTiles();
+            message.style.display = 'none';
+        }
 
-    function toggleColor(e) {
-      const tile = e.target;
-      const tileIndex = Array.from(tiles).indexOf(tile);
-      const row = Math.floor(tileIndex / numCols);
-      const col = tileIndex % numCols;
+        newGameButton.onclick = newGame;
 
-      // Toggle color of clicked tile
-      tile.style.backgroundColor =
-        tile.style.backgroundColor === 'red' ? 'green' : 'red';
-
-      // Toggle color of surrounding tiles
-      const surroundingTiles = [
-        tiles[tileIndex - numCols], // above
-        tiles[tileIndex + numCols], // below
-        tiles[tileIndex - 1], // left
-        tiles[tileIndex + 1], // right
-      ];
-      surroundingTiles.forEach((tile) => {
-        if (tile)
-          tile.style.backgroundColor =
-            tile.style.backgroundColor === 'red' ? 'green' : 'red';
-      });
-    }
-
-    function getRandomColor() {
-      const colors = ['green', 'red'];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-  </script>
+        initializeTiles();
+        scrambleTiles();
+    </script>
 </body>
 </html>
