@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Inspiration</title>
+  <style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 140%;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .word {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+  <script>
+    const quotes = [
+    "Believe you can and you're halfway there.",
+    "Change your thoughts and you change your world.",
+    "The only way to do great work is to love what you do.",
+    "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+    "It always seems impossible until it's done.",
+    "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.",
+    "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+    "The best way to predict the future is to create it.",
+    "Hardships often prepare ordinary people for an extraordinary destiny.",
+    "Don't watch the clock; do what it does. Keep going.",
+    "The only limit to our realization of tomorrow will be our doubts of today.",
+    "The only way to do great work is to love what you do.",
+    "The best way to find yourself is to lose yourself in the service of others.",
+    "The only thing we have to fear is fear itself.",
+    "Be yourself; everyone else is already taken.",
+    "The greatest glory in living lies not in never falling, but in rising every time we fall.",
+    "I have not failed. I've just found 10,000 ways that won't work.",
+    "Success is not how high you have climbed, but how you make a positive difference to the world.",
+    "Life is 10% what happens to us and 90% how we react to it.",
+    "You miss 100% of the shots you don't take.",
+    "Strive not to be a success, but rather to be of value.",
+    "Successful people do what unsuccessful people are not willing to do.",
+    "I can't change the direction of the wind, but I can adjust my sails to always reach my destination.",
+    "The best and most beautiful things in the world cannot be seen or even touched - they must be felt with the heart.",
+    "Positive anything is better than negative nothing.",
+    "Success is not the key to happiness. Happiness is the key to success.",
+    "Successful people are always looking for opportunities to help others. Unsuccessful people are always asking, 'What's in it for me?'",
+    "Success is not the result of spontaneous combustion. You must set yourself on fire.",
+    "Success is a journey, not a destination.",
+    "Success is not measured by what you accomplish, but by the opposition you have encountered, and the courage with which you have maintained the struggle against overwhelming odds.",
+    "Success is not final, failure is not fatal: it's the courage to continue that counts",
+      // Add 40 more inspiring quotes below:
+      "Your time is limited, don't waste it living someone else's life.",
+      "Life is what happens when you're busy making other plans.",
+      "The best revenge is massive success.",
+      "You miss 100% of the shots you don't take.",
+      "The best way to predict the future is to create it.",
+      "The only thing standing between you and your goal is the story you keep telling yourself as to why you can't achieve it.",
+      "The secret of getting ahead is getting started.",
+      "The harder you work for something, the greater you'll feel when you achieve it.",
+      "Don't watch the clock; do what it does. Keep going.",
+      "We generate fears while we sit. We overcome them by action.",
+      "You are never too old to set another goal or to dream a new dream.",
+      "The only limit to our realization of tomorrow will be our doubts of today.",
+      "The future belongs to those who believe in the beauty of their dreams.",
+      "The most effective way to do it is to do it.",
+      "The only way to achieve the impossible is to believe it is possible.",
+      "Believe in yourself, take on your challenges, dig deep within yourself to conquer fears. Never let anyone bring you down. You got this.",
+      "Hardships often prepare ordinary people for an extraordinary destiny.",
+      "The best and most beautiful things in the world cannot be seen or even touched - they must be felt with the heart.",
+      "The best time to plant a tree was 20 years ago. The second best time is now.",
+      "In the middle of every difficulty lies opportunity.",
+      "The road to success and the road to failure are almost exactly the same.",
+      "Don't let yesterday take up too much of today.",
+      "A successful man is one who can lay a firm foundation with the bricks others have thrown at him.",
+      "In order to succeed, we must first believe that we can.",
+      "Don't let the fear of losing be greater than the excitement of winning.",
+      "You learn more from failure than from success. Don't let it stop you. Failure builds character.",
+      "It does not matter how slowly you go as long as you do not stop.",
+      "Action is the foundational key to all success.",
+      "Everything you've ever wanted is on the other side of fear.",
+      "Success is walking from failure to failure with no loss of enthusiasm.",
+      "What lies behind us and what lies before us are tiny matters compared to what lies within us.",
+      "The only person you are destined to become is the person you decide to be.",
+      "The greatest glory in living lies not in never falling, but in rising every time we fall.",
+      "Success is not the key to happiness. Happiness is the key to success. If you love what you are doing, you will be successful.",
+      "Dream big and dare to fail.",
+      "Do one thing every day that scares you.",
+      "The only place where success comes before work is in the dictionary.",
+      "The difference between ordinary and extraordinary is that little extra.",
+      "If you can dream it, you can do it.",
+      "The question isn't who is going to let me; it's who is going to stop me.",
+      "You become what you believe.",
+      "The best way to get started is to quit talking and begin doing."
+      ];
+
+      const pickRandomQuote = () => {
+        return quotes[Math.floor(Math.random() * quotes.length)];
+      };
+
+      const displayRandomQuote = () => {
+        const quote = pickRandomQuote();
+        const words = quote.split(' ');
+
+        words.forEach((word, index) => {
+          const wordElement = document.createElement('span');
+          wordElement.className = 'word';
+          wordElement.textContent = word;
+          wordElement.style.top = `${Math.random() * 90}vh`;
+          wordElement.style.left = `${Math.random() * 90}vw`;
+
+          wordElement.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+
+            const onMouseMove = (event) => {
+              wordElement.style.top = `${event.pageY - e.offsetY}px`;
+              wordElement.style.left = `${event.pageX - e.offsetX}px`;
+            };
+
+            const onMouseUp = () => {
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          });
+
+          document.body.appendChild(wordElement);
+        });
+      };
+
+      displayRandomQuote();
+
+      window.addEventListener('beforeunload', () => {
+        location.reload();
+      });
+    </script>
+  </body>
+  </html>
