@@ -81,11 +81,14 @@
       counter.textContent = parseInt(counter.textContent) + randomNumber;
     }
 
-    document.addEventListener("keydown", () => {
+    function performAction() {
       angle += 0.1;
       updatePosition();
       updateCounter();
-    });
+    }
+
+    document.addEventListener("keydown", performAction);
+    document.addEventListener("click", performAction);
 
     updatePosition();
   </script>
