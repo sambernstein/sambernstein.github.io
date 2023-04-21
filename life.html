@@ -17,10 +17,22 @@
     #title {
       font-size: 40px;
     }
-    #counter {
+    #counter-container {
       position: absolute;
       top: 10px;
       right: 10px;
+    }
+    #hedons-text {
+      font-size: 30px;
+      margin-right: 40px;
+    }
+    #hectic-text {
+      user-select: none;
+    }
+    #tedium-text {
+      user-select: none;
+    }
+    #counter {
       font-size: 50px;
     }
     #game {
@@ -41,23 +53,28 @@
       height: 400px;
       background-color: gray;
       font-size: 34px;
+      user-select: none;
     }
     #green-circle {
       width: 100px;
       height: 100px;
       background-color: green;
       font-size: 26px;
+      user-select: none;
     }
   </style>
 </head>
 <body>
   <div id="title">Life</div>
-  <div id="counter">0</div>
+  <div id="counter-container">
+    <span id="hedons-text">Hedons:</span>
+    <span id="counter">0</span>
+  </div>
   <div>
     <input type="radio" id="tedium" name="mode" value="tedium" checked>
-    <label for="tedium">Tedium</label>
+    <label for="tedium" id="tedium-text">Tedium</label>
     <input type="radio" id="hectic" name="mode" value="hectic">
-    <label for="hectic">Hectic</label>
+    <label for="hectic" id="hectic-text">Hectic</label>
   </div>
   <div id="game">
     <div id="gray-circle" class="circle">
@@ -84,40 +101,55 @@
       greenCircle.style.top = `${y - greenCircle.offsetHeight / 2}px`;
     }
 
-    function updateCounter() {
-      const ks = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 30, 100];
+    function updateCounterColor() {
       const counterNum = parseInt(counter.textContent);
-      const opposite = -counterNum;
-      const k = ks[Math.floor(Math.random() * ks.length)];
-      const newCounterValue = counterNum + Math.floor(Math.random() * (2 * k + 1)) + opposite - k;
-      counter.textContent = newCounterValue;
-    }
+      if (counterNum === 0) {
+        counter.style.color = 'black';
+      } else if (counterNum > 0) {
+    const greenIntensity = Math.min(Math.round((counterNum / 100) * 255), 255);
+    counter.style.color = `rgb(0, ${greenIntensity}, 0)`;
+  } else {
+    const redIntensity = Math.min(Math.round((-counterNum / 100) * 255), 255);
+    counter.style.color = `rgb(${redIntensity}, 0, 0)`;
+  }
+}
 
-    function performTediumAction() {
-      angle += 0.1;
-      updatePosition();
-      updateCounter();
-    }
+function updateCounter() {
+  const ks = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 30, 100];
+  const counterNum = parseInt(counter.textContent);
+  const opposite = -counterNum;
+  const k = ks[Math.floor(Math.random() * ks.length)];
+  const newCounterValue = counterNum + Math.floor(Math.random() * (2 * k + 1)) + opposite - k;
+  counter.textContent = newCounterValue;
+  updateCounterColor();
+}
 
-    function performHecticAction() {
-      const x = centerX + radius * Math.random() * 2 - radius;
-      const y = centerY + radius * Math.random() * 2 - radius;
-      greenCircle.style.left = `${x - greenCircle.offsetWidth / 2}px`;
-      greenCircle.style.top = `${y - greenCircle.offsetHeight / 2}px`;
-      updateCounter();
-    }
-    function performAction() {
-      if (tediumMode.checked) {
-        performTediumAction();
-      } else if (hecticMode.checked) {
-        performHecticAction();
-      }
-    }
+function performTediumAction() {
+  angle += 0.1;
+  updatePosition();
+  updateCounter();
+}
 
-    document.addEventListener("keydown", performAction);
-    document.addEventListener("click", performAction);
+function performHecticAction() {
+  const x = centerX + radius * Math.random() * 2 - radius;
+  const y = centerY + radius * Math.random() * 2 - radius;
+  greenCircle.style.left = `${x - greenCircle.offsetWidth / 2}px`;
+  greenCircle.style.top = `${y - greenCircle.offsetHeight / 2}px`;
+  updateCounter();
+}
 
-    updatePosition();
+function performAction() {
+  if (tediumMode.checked) {
+    performTediumAction();
+  } else if (hecticMode.checked) {
+    performHecticAction();
+  }
+}
+
+document.addEventListener("keydown", performAction);
+document.addEventListener("click", performAction);
+
+updatePosition();
   </script>
 </body>
 </html>
