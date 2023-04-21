@@ -1,58 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Life</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  #title {
-    font-size: 40px;
-  }
-  #counter {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 50px;
-  }
-  #game {
-    position: relative;
-    width: 400px;
-    height: 400px;
-  }
-  .circle {
-    position: absolute;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-  }
-  #gray-circle {
-    width: 400px;
-    height: 400px;
-    background-color: gray;
-    font-size: 34px;
-  }
-  #green-circle {
-    width: 100px;
-    height: 100px;
-    background-color: green;
-    font-size: 26px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #title {
+      font-size: 40px;
+    }
+    #counter {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 50px;
+    }
+    #game {
+      position: relative;
+      width: 400px;
+      height: 400px;
+    }
+    .circle {
+      position: absolute;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+    }
+    #gray-circle {
+      width: 400px;
+      height: 400px;
+      background-color: gray;
+      font-size: 34px;
+    }
+    #green-circle {
+      width: 100px;
+      height: 100px;
+      background-color: green;
+      font-size: 26px;
+    }
+  </style>
 </head>
 <body>
   <div id="title">Life</div>
   <div id="counter">0</div>
+  <div>
+    <input type="radio" id="tedium" name="mode" value="tedium" checked>
+    <label for="tedium">Tedium</label>
+    <input type="radio" id="hectic" name="mode" value="hectic">
+    <label for="hectic">Hectic</label>
+  </div>
   <div id="game">
     <div id="gray-circle" class="circle">
       <span>Tasks</span>
@@ -64,6 +70,8 @@
   <script>
     const greenCircle = document.getElementById("green-circle");
     const counter = document.getElementById("counter");
+    const tediumMode = document.getElementById("tedium");
+    const hecticMode = document.getElementById("hectic");
     const radius = 150;
     const centerX = 200;
     const centerY = 200;
@@ -77,14 +85,33 @@
     }
 
     function updateCounter() {
-      const randomNumber = Math.floor(Math.random() * 14) - 3;
-      counter.textContent = parseInt(counter.textContent) + randomNumber;
+      const ks = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 30, 100];
+      const counterNum = parseInt(counter.textContent);
+      const opposite = -counterNum;
+      const k = ks[Math.floor(Math.random() * ks.length)];
+      const newCounterValue = counterNum + Math.floor(Math.random() * (2 * k + 1)) + opposite - k;
+      counter.textContent = newCounterValue;
     }
 
-    function performAction() {
+    function performTediumAction() {
       angle += 0.1;
       updatePosition();
       updateCounter();
+    }
+
+    function performHecticAction() {
+      const x = centerX + radius * Math.random() * 2 - radius;
+      const y = centerY + radius * Math.random() * 2 - radius;
+      greenCircle.style.left = `${x - greenCircle.offsetWidth / 2}px`;
+      greenCircle.style.top = `${y - greenCircle.offsetHeight / 2}px`;
+      updateCounter();
+    }
+    function performAction() {
+      if (tediumMode.checked) {
+        performTediumAction();
+      } else if (hecticMode.checked) {
+        performHecticAction();
+      }
     }
 
     document.addEventListener("keydown", performAction);
