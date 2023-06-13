@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>Melon Website</title>
+    <style>
+      h1 {
+        font-size: 72px;
+        text-align: center;
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="melon">Melon</h1>
+    <audio id="melon-audio-1" src="melon.mp3"></audio>
+    <audio id="melon-audio-2" src="melon-car.mp3"></audio>
+    <script>
+      const melonElement = document.getElementById("melon");
+      const melonAudio1 = document.getElementById("melon-audio-1");
+      const melonAudio2 = document.getElementById("melon-audio-2");
+      melonElement.addEventListener("click", () => {
+        melonAudio1.currentTime = 0;
+        melonAudio2.currentTime = 0;
+        melonAudio1.play();
+        melonAudio2.play();
+      });
+    </script>
+  </body>
+</html>
