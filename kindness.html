@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #explanatory {
+            font-size: 16px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        #top-container {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 40px;
+            text-align: center;
+            margin: 0;
+        }
+
+        p {
+            font-size: 32px;
+            color: blue;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        /* Increase the size of the text on mobile */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 80px;
+            }
+
+            p {
+                font-size: 64px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="top-container">
+        <h1>Today's Suggested Random Act of Kindness:</h1>
+    </div>
+    <p id="kindness"></p>
+
+    <div id="explanatory">
+        This website displays a different act of kindness every day. They are hand-selected to not be cringe, to be easy to do in less than 5 minutes, to be free or inexpensive, and to be doable by you today. Acts of kindness are a highly effective way of making yourself happier, so go be selfish and do something kind!
+    </div>
+
+    <script>
+        let actsOfKindness = [];
+
+        // Fetch acts of kindness from text file
+        fetch('actsOfKindness.txt')
+        .then(response => response.text())
+        .then(data => {
+            // Split the data by newline character to get an array of acts
+            actsOfKindness = data.split('\n');
+
+            // Get today's date
+            const today = new Date();
+            // Use date to deterministically select an act of kindness
+            const act = actsOfKindness[(today.getFullYear() + today.getMonth() + today.getDate()) % actsOfKindness.length];
+
+            // Display act of kindness
+            document.getElementById('kindness').textContent = act;
+        })
+        .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
