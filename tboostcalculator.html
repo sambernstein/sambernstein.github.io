@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Testosterone Competition Winner Calculator</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      margin-bottom: 14px; /* Added 14px margin at the bottom of the table */
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 5px;
+    }
+    #resultMessage {
+      font-size: 36px;
+      color: green;
+      margin-top: 10px;
+    }
+    #resultContainer {
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Testosterone Competition Winner Calculator</h1>
+  <p>
+    This calculator shows who won in a competition to see who could raise their testosterone more in a fixed amount of time. The formula is designed to be fair for two men competing even if they start at different starting testosterone levels.
+    See <a href="https://docs.google.com/document/d/1QhsvOvGGjOnVaP3xWQUPLEspwgEywEtt7Xil-KkFj04/edit?usp=sharing" target="_blank">this link</a> for what this competition is all about.
+  </p>
+  <table>
+    <tr>
+      <th></th>
+      <th>Name:</th>
+      <th>Starting T level:</th>
+      <th>Ending T level:</th>
+      <th>T Boost Score:</th>
+    </tr>
+    <tr>
+      <td>Competitor 1</td>
+      <td><input type="text" id="name1"></td>
+      <td><input type="text" id="startT1"></td>
+      <td><input type="text" id="endT1"></td>
+      <td><span id="tBoost1"></span></td>
+    </tr>
+    <tr>
+      <td>Competitor 2</td>
+      <td><input type="text" id="name2"></td>
+      <td><input type="text" id="startT2"></td>
+      <td><input type="text" id="endT2"></td>
+      <td><span id="tBoost2"></span></td>
+    </tr>
+    <tr>
+      <td>Competitor 3</td>
+      <td><input type="text" id="name3"></td>
+      <td><input type="text" id="startT3"></td>
+      <td><input type="text" id="endT3"></td>
+      <td><span id="tBoost3"></span></td>
+    </tr>
+    <tr>
+      <td>Competitor 4</td>
+      <td><input type="text" id="name4"></td>
+      <td><input type="text" id="startT4"></td>
+      <td><input type="text" id="endT4"></td>
+      <td><span id="tBoost4"></span></td>
+    </tr>
+  </table>
+  <button onclick="calculateTBoost()">Calculate</button>
+  <div id="resultContainer">
+    <div id="resultMessage"></div>
+  </div>
+
+  <script>
+    var mean = 600;
+    var stdDev = 100;
+
+    function normalCDF(x, mean, stdDev) {
+      const sqrt2Pi = Math.sqrt(2 * Math.PI);
+const z = (x - mean) / stdDev;
+return 0.5 * (1 + erf(z / Math.sqrt(2)));
+}
+function erf(x) {
+  // Approximation of the error function (Abramowitz and Stegun approximation)
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  const sign = (x >= 0) ? 1 : -1;
+  x = Math.abs(x);
+
+  const t = 1.0 / (1.0 + p * x);
+  const y = ((((a5 * t + a4) * t) + a3) * t + a2) * t + a1;
+  return sign * (1 - y * Math.exp(-x * x));
+}
+
+function trapezoidalRule(f, a, b, n) {
+  const h = (b - a) / n;
+  let sum = 0.5 * (f(a) + f(b));
+  for (let i = 1; i < n; i++) {
+    sum += f(a + i * h);
+  }
+  return sum * h;
+}
+
+function integralNormalCDF(startT, endT, stdDev) {
+  const numIntervals = 1000;
+
+  const cdf = x => normalCDF(x, mean, stdDev);
+  return trapezoidalRule(cdf, startT, endT, numIntervals);
+}
+
+function TBoostScore(startT, endT, stdDev) {
+    var distributionScore = integralNormalCDF(startT, endT, stdDev);
+    var absScore = endT - startT
+    const absWeight = 0.3;
+    return absWeight * absScore + (1.0 - absWeight) * distributionScore;
+}
+
+function calculateTBoost() {
+  var scores = [];
+  var hasValues = false;
+  
+  for (let i = 1; i <= 4; i++) {
+    var startT = parseFloat(document.getElementById("startT" + i).value);
+    var endT = parseFloat(document.getElementById("endT" + i).value);
+
+    if (!isNaN(startT) && !isNaN(endT)) {
+      hasValues = true;
+      var tBoost = TBoostScore(startT, endT, stdDev);
+      scores.push({competitor: i, score: tBoost});
+      document.getElementById("tBoost" + i).innerText = tBoost.toFixed(2);
+    }
+  }
+
+  if (!hasValues) {
+    document.getElementById("resultMessage").style.color = "red";
+    document.getElementById("resultMessage").innerText = "Enter values in table";
+    return;
+  }
+
+  scores.sort((a, b) => b.score - a.score);
+  var winner = scores[0].competitor;
+  var winnerName = document.getElementById("name" + winner).value;
+  if (winnerName === "") {
+    winnerName = "Competitor " + winner;
+  }
+  document.getElementById("resultMessage").style.color = "green";
+  document.getElementById("resultMessage").innerText = winnerName + " won!";
+}
+  </script>
+</body>
+</html>
