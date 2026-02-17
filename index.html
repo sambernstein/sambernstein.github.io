@@ -1,62 +1,63 @@
 <!DOCTYPE html>
-<head lang="en">
-  <title>Sam Bernstein's Homepage</title>
-  <link rel="stylesheet" type="text/css" href="./style.css"></link>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
-</head>
-
-
-<!-- <html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CodePen - Game of Life on Canvas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sam Bernstein — AI Researcher</title>
   <link rel="stylesheet" href="./style.css">
-</head> -->
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
 <body>
-<!-- partial:index.partial.html -->
-<html>
-<body>
-  <canvas id="golCanvas">Go and look for a new browser.</canvas>
 
-  <main>
-    <h1>Hi! I'm Sam</h1>
-    <img id="me" src="me-pic.jpg" width=200 alt="Sam Bernstein"></img>
-    <p>I'm an AI researcher working for <a href="http://rhino.ai/">Rhino.ai</a>.</p>
-    <p>I like solving hard problems, biohacking, and waxing poetic about the nature of reality. Check out some of my projects in the side bar, or click around on this text and see what we can build together.</p>
-  </main>
+  <canvas id="golCanvas"></canvas>
 
-  <div id="subtitle">
-    <subtitle></subtitle>
+  <div class="container">
+
+    <div class="col-left">
+      <header>
+        <h1>Sam Bernstein</h1>
+        <p class="tagline">AI Researcher at <a href="http://rhino.ai/">Rhino.ai</a></p>
+      </header>
+
+      <section class="bio">
+        <img id="me" src="me-pic.jpg" alt="Sam Bernstein">
+        <p>I like solving hard problems, biohacking, and waxing poetic about the nature of reality. Check out some of my projects, or click around on the background and see what we can build together.</p>
+      </section>
+
+      <section class="connect">
+        <h2>Connect</h2>
+        <div class="connect-links">
+          <a class="pill" href="https://github.com/sambernstein">GitHub</a>
+          <a class="pill" href="https://www.linkedin.com/in/sambernstein1">LinkedIn</a>
+        </div>
+      </section>
+    </div>
+
+    <section class="projects">
+      <h2>Projects</h2>
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-title">Shufflescape (COMING SOON)</span>
+        </div>
+        <a class="card" href="https://sambernstein.github.io/chgrid.html">
+          <span class="card-title">Turn Them Green</span>
+        </a>
+        <a class="card" href="https://sambernstein.github.io/build_inspiration.html">
+          <span class="card-title">Build Inspiration</span>
+        </a>
+        <a class="card" href="https://github.com/sambernstein/Shapeshifting-Geese">
+          <span class="card-title">Shapeshifting Geese</span>
+        </a>
+        <a class="card" href="https://sambernstein.github.io/kindness.html">
+          <span class="card-title">Random Act of Kindness</span>
+        </a>
+      </div>
+    </section>
+
   </div>
 
-  <div id="nav">
-    <nav>
-      <h3>Projects</h3>
-      <ul>
-        <li><a href="https://github.com/sambernstein/Get-Me-Outta-Here">Get Me Outta Here</a> </li>
-        <li><a href="https://sambernstein.github.io/chgrid.html">Turn Them Green</a></li>
-        <li><a href="https://sambernstein.github.io/build_inspiration.html">Build Inspiration</a></li>
-        <li><a href="https://github.com/sambernstein/Shapeshifting-Geese">Shapeshifting Geese</a></li>
-        <li><a href="https://sambernstein.github.io/kindness.html">Random Act of Kindness</a></li>
-      </ul>
-      <h3>Professional</h3>
-      <ul>
-        <li><a href="https://github.com/sambernstein">GitHub</a></li>
-        <li><a href="https://www.linkedin.com/in/sambernstein1">LinkedIn</a></li>
-      </ul>
-    </nav>
-  </div>
-
+  <script src="https://code.jquery.com/jquery-1.10.0.min.js"></script>
+  <script src="./script.js"></script>
 
 </body>
 </html>
-<!-- partial -->
-  <script src='https://code.jquery.com/jquery-1.10.0.min.js'></script><script  src="./script.js"></script>
-
-</body>
-</html>
-
-
-
-
