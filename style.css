@@ -37,9 +37,9 @@ body {
 .container {
   position: relative;
   z-index: 1;
-  max-width: 960px;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 40px 32px 32px;
+  padding: 40px 40px 32px;
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1.4fr;
@@ -57,11 +57,11 @@ body {
 /* ===== Header ===== */
 
 header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 header h1 {
-  font-size: 2.25rem;
+  font-size: 2.6rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #e2ece8;
@@ -69,7 +69,7 @@ header h1 {
 }
 
 .tagline {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   color: #7a8a84;
   font-weight: 400;
 }
@@ -87,12 +87,12 @@ header h1 {
 /* ===== Bio ===== */
 
 .bio {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 img#me {
-  width: 130px;
-  height: 130px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid rgba(16, 185, 129, 0.25);
@@ -101,7 +101,7 @@ img#me {
 }
 
 .bio p {
-  font-size: 0.925rem;
+  font-size: 1rem;
   color: #b0c4bc;
   line-height: 1.65;
 }
@@ -109,7 +109,7 @@ img#me {
 /* ===== Section Headings ===== */
 
 h2 {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -130,8 +130,8 @@ h2 {
 
 .pill {
   display: inline-block;
-  padding: 8px 20px;
-  font-size: 0.85rem;
+  padding: 9px 22px;
+  font-size: 0.9rem;
   font-weight: 500;
   color: #10b981;
   background: transparent;
@@ -158,13 +158,13 @@ h2 {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .card {
   display: flex;
   align-items: center;
-  padding: 14px 18px;
+  padding: 16px 20px;
   background: rgba(16, 185, 129, 0.04);
   border: 1px solid rgba(16, 185, 129, 0.1);
   border-radius: 10px;
@@ -178,7 +178,7 @@ h2 {
 }
 
 .card-title {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: #e2ece8;
   transition: color 0.2s ease;
@@ -219,7 +219,7 @@ h2 {
   }
 
   .bio {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   img#me {
@@ -251,7 +251,8 @@ h2 {
   }
 
   .connect {
-    margin-top: 20px;
+    margin-top: 10px;
+    margin-bottom: 24px;
   }
 
   .pill {
