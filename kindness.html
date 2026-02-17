@@ -68,24 +68,102 @@
     </div>
 
     <script>
-        let actsOfKindness = [];
+        const actsOfKindness = [
+            "Offer your seat to someone on public transit.",
+            "Share a smile with a stranger.",
+            "Write a positive review for a small business.",
+            "Pick up litter in a public place.",
+            "Write an encouraging note and leave it in a public place.",
+            "Share a friend's business or project on your social media.",
+            "Leave a nice comment on someone's blog, vlog, or social media post.",
+            "Give someone a recipe you think they would like.",
+            "Leave a book you've finished in a public place for someone else to find with a note saying 'FREE: ENJOY'.",
+            "Donate your used clothes or books.",
+            "Recommend a good book, movie, or song to someone.",
+            "Thank a service worker genuinely.",
+            "Offer help to a neighbor with chores.",
+            "Donate blood.",
+            "Leave a kind note in a library book you're going to return.",
+            "Send a thank you email to a coworker.",
+            "Leave a positive sticky note on someone's desk or locker.",
+            "Tell someone that you appreciate them.",
+            "Send a motivational text to a friend.",
+            "Leave a nice note for your mail carrier.",
+            "Make someone laugh.",
+            "Share an uplifting quote with someone.",
+            "Post 2 inspirational sticky notes around your neighborhood.",
+            "Reach out to a lonely neighbor.",
+            "Share a useful app you've found with someone.",
+            "Lend an ear to someone who needs to vent.",
+            "Make a short playlist for a friend.",
+            "Offer to babysit for a friend who needs a break.",
+            "Leave change in a vending machine.",
+            "Send a good morning text.",
+            "Post 3 anonymous sticky notes with positive messages around the office.",
+            "Tell your friends and family you love them.",
+            "Volunteer at a local community event.",
+            "Buy and give a stranger a lottery ticket.",
+            "Let someone know you're thinking of them.",
+            "Wish a stranger a good day.",
+            "Offer to return a shopping cart to the store for someone.",
+            "Today's random act of kindness is to be kind to *yourself*.",
+            "Hold the door open for someone.",
+            "Give someone a sincere compliment.",
+            "Let someone with fewer items go ahead of you in the checkout line.",
+            "Compliment a stranger.",
+            "Pick up litter on the street.",
+            "Leave a kind note in a library book.",
+            "Donate to a charity online.",
+            "Leave a generous tip for service staff.",
+            "Give up your seat on public transportation for someone who needs it.",
+            "Text a friend or family member to tell them you love them.",
+            "Give someone a genuine smile.",
+            "Write a positive review for a local business online.",
+            "Call a friend who might be lonely.",
+            "Leave a thank you note for your mail carrier.",
+            "Pay for the person behind you in a drive-thru.",
+            "Praise a colleague's work to their supervisor.",
+            "Send an encouraging email to someone going through a tough time.",
+            "Put some change in a parking meter that's about to expire.",
+            "Share a useful or entertaining social media post.",
+            "Lend an ear to someone who needs to vent.",
+            "Leave a positive comment on a blog or article.",
+            "Send a message of appreciation to an old teacher.",
+            "Today's random act of kindness is to be kind to *yourself*.",
+            "Give someone a hug (with their consent).",
+            "Show genuine interest in someone's story.",
+            "Send an uplifting text to someone you haven't contacted in a long time.",
+            "Clean up after someone else, even if it's not your mess.",
+            "Leave a motivational note for someone to find.",
+            "Support a fundraiser or GoFundMe campaign.",
+            "Buy a meal for a homeless person.",
+            "Leave a bottle of water for your delivery person.",
+            "Recommend a good book or movie to a friend.",
+            "Share a kind or funny meme with a friend.",
+            "Offer to take a photo for a group of people.",
+            "Give up your spot in line to someone in a hurry.",
+            "Compliment someone's pet.",
+            "Share your favorite recipe with a friend.",
+            "Connect two friends who you think would get along.",
+            "Leave change in a vending machine for the next person.",
+            "Tell someone's manager about their excellent service.",
+            "Share an interesting article or podcast with a friend.",
+            "Donate old clothes to a charity.",
+            "Buy a lottery ticket and give it to a stranger.",
+            "Share a positive quote on social media.",
+            "Thank a healthcare worker you know for their service.",
+            "Write a positive message on a sticky note and leave it in a public place.",
+            "Invite someone to a group or club you're part of.",
+            "Bring your coworker a surprise snack."
+        ];
 
-        // Fetch acts of kindness from text file
-        fetch('actsOfKindness.txt')
-        .then(response => response.text())
-        .then(data => {
-            // Split the data by newline character to get an array of acts
-            actsOfKindness = data.split('\n');
+        // Get today's date
+        const today = new Date();
+        // Use date to deterministically select an act of kindness
+        const act = actsOfKindness[(today.getFullYear() + today.getMonth() + today.getDate()) % actsOfKindness.length];
 
-            // Get today's date
-            const today = new Date();
-            // Use date to deterministically select an act of kindness
-            const act = actsOfKindness[(today.getFullYear() + today.getMonth() + today.getDate()) % actsOfKindness.length];
-
-            // Display act of kindness
-            document.getElementById('kindness').textContent = act;
-        })
-        .catch(error => console.error('Error:', error));
+        // Display act of kindness
+        document.getElementById('kindness').textContent = act;
     </script>
 </body>
 </html>
