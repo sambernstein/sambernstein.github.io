@@ -34,6 +34,7 @@
         grid-gap: 2px;
         width: 543px;
         margin-right: 30px;
+        position: relative;
     }
     .tile {
         aspect-ratio: 1;
@@ -45,6 +46,18 @@
     }
     .red {
         background-color: red;
+    }
+    @keyframes fade-outline {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .toggle-outline {
+        position: absolute;
+        border: 3px solid white;
+        border-radius: 3px;
+        pointer-events: none;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.6), inset 0 0 0 3px rgba(0,0,0,0.3);
+        animation: fade-outline 0.6s linear forwards;
     }
     #message {
         font-size: 28px;
@@ -66,10 +79,42 @@
     #instr-text {
         font-size: 18px;
     }
+    .stepper {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        vertical-align: middle;
+    }
+    .stepper-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 2px solid black;
+        background: white;
+        border-radius: 8px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+    .stepper-btn:active {
+        background: #ddd;
+    }
     #scramble-count {
         font-size: 18px;
-        width: 80px;
-        height: 30px;
+        width: 64px;
+        height: 44px;
+        text-align: center;
+        border: 2px solid black;
+        border-radius: 8px;
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+    #scramble-count::-webkit-outer-spin-button,
+    #scramble-count::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 
     @media (max-width: 600px) {
@@ -109,10 +154,15 @@
             padding: 8px 16px;
             margin-bottom: 8px;
         }
+        .stepper-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+        }
         #scramble-count {
             font-size: 16px;
-            width: 70px;
-            height: 28px;
+            width: 58px;
+            height: 40px;
         }
     }
 </style>
@@ -126,14 +176,18 @@
             <div id="instructions">
                 <div id="instr-text">
                     <p>
-                        Instructions: The goal of this game is to get all tiles to be green. Do this by clicking on tiles to toggle the color of the 3x3 grid around each tile from red to green or green to red. Clicking "New Game" re-scrambles the board from the solved (all green) state by randomly robo-clicking on as many tiles as you set in the number box.
-                        <br><br>
-                        Higher numbers in the number box give more difficult and scrambled boards!
+                        Click a tile to toggle the 3x3 area around it.<br>
+                        Turn them all green to win!<br>
+                        Hit "New Game" to scramble - higher numbers = harder.
                     </p>
                 </div>
             </div>
             <button id="new-game-button">New Game</button>
-            <input type="number" id="scramble-count" placeholder="Scramble count" min="0" value="1">
+            <div class="stepper">
+                <button class="stepper-btn" id="stepper-minus">&minus;</button>
+                <input type="number" id="scramble-count" min="0" max="9999" value="1" inputmode="numeric">
+                <button class="stepper-btn" id="stepper-plus">+</button>
+            </div>
         </div>
     </div>
     <script>
@@ -151,7 +205,7 @@ tiles[i] = [];
 for (let j = 0; j < gridSize; j++) {
 const tile = document.createElement('div');
 tile.className = 'tile green';
-tile.onclick = () => toggleTiles(i, j);
+tile.onclick = () => toggleTiles(i, j, true);
 tiles[i][j] = tile;
 container.appendChild(tile);
 }
@@ -166,15 +220,36 @@ container.appendChild(tile);
         }
     }
 
-    function toggleTiles(row, col) {
-        for (let i = row - 1; i <= row + 1; i++) {
-            for (let j = col - 1; j <= col + 1; j++) {
-                if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
-                    tiles[i][j].classList.toggle('green');
-                    tiles[i][j].classList.toggle('red');
-                }
+    function toggleTiles(row, col, animate) {
+        const minRow = Math.max(0, row - 1);
+        const maxRow = Math.min(gridSize - 1, row + 1);
+        const minCol = Math.max(0, col - 1);
+        const maxCol = Math.min(gridSize - 1, col + 1);
+
+        for (let i = minRow; i <= maxRow; i++) {
+            for (let j = minCol; j <= maxCol; j++) {
+                tiles[i][j].classList.toggle('green');
+                tiles[i][j].classList.toggle('red');
             }
         }
+
+        if (animate) {
+            const gridRect = container.getBoundingClientRect();
+            const tlRect = tiles[minRow][minCol].getBoundingClientRect();
+            const brRect = tiles[maxRow][maxCol].getBoundingClientRect();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'toggle-outline';
+            overlay.style.top = (tlRect.top - gridRect.top) + 'px';
+            overlay.style.left = (tlRect.left - gridRect.left) + 'px';
+            overlay.style.width = (brRect.right - tlRect.left) + 'px';
+            overlay.style.height = (brRect.bottom - tlRect.top) + 'px';
+            container.appendChild(overlay);
+            overlay.addEventListener('animationend', function() {
+                overlay.remove();
+            }, { once: true });
+        }
+
         checkWinCondition();
     }
 
@@ -193,9 +268,27 @@ container.appendChild(tile);
         }
         if (allGreen) {
             message.style.display = 'block';
+            showWinOutline();
         } else {
             message.style.display = 'none';
         }
+    }
+
+    function showWinOutline() {
+        const gridRect = container.getBoundingClientRect();
+        const tlRect = tiles[0][0].getBoundingClientRect();
+        const brRect = tiles[gridSize - 1][gridSize - 1].getBoundingClientRect();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'toggle-outline';
+        overlay.style.top = (tlRect.top - gridRect.top) + 'px';
+        overlay.style.left = (tlRect.left - gridRect.left) + 'px';
+        overlay.style.width = (brRect.right - tlRect.left) + 'px';
+        overlay.style.height = (brRect.bottom - tlRect.top) + 'px';
+        container.appendChild(overlay);
+        overlay.addEventListener('animationend', function() {
+            overlay.remove();
+        }, { once: true });
     }
     function newGame() {
         initializeTiles();
@@ -204,6 +297,53 @@ container.appendChild(tile);
     }
 
     newGameButton.onclick = newGame;
+
+    const stepperPlus = document.getElementById('stepper-plus');
+    const stepperMinus = document.getElementById('stepper-minus');
+
+    function clampValue() {
+        let v = parseInt(scrambleCountInput.value) || 0;
+        v = Math.max(0, Math.min(9999, v));
+        scrambleCountInput.value = v;
+    }
+
+    function stepValue(delta) {
+        let v = parseInt(scrambleCountInput.value) || 0;
+        v = Math.max(0, Math.min(9999, v + delta));
+        scrambleCountInput.value = v;
+    }
+
+    scrambleCountInput.addEventListener('change', clampValue);
+    scrambleCountInput.addEventListener('blur', clampValue);
+
+    function setupHoldRepeat(btn, delta) {
+        let holdTimeout, holdInterval;
+
+        function startHold(e) {
+            e.preventDefault();
+            stepValue(delta);
+            holdTimeout = setTimeout(function() {
+                holdInterval = setInterval(function() {
+                    stepValue(delta);
+                }, 80);
+            }, 400);
+        }
+
+        function stopHold() {
+            clearTimeout(holdTimeout);
+            clearInterval(holdInterval);
+        }
+
+        btn.addEventListener('mousedown', startHold);
+        btn.addEventListener('touchstart', startHold, { passive: false });
+        btn.addEventListener('mouseup', stopHold);
+        btn.addEventListener('mouseleave', stopHold);
+        btn.addEventListener('touchend', stopHold);
+        btn.addEventListener('touchcancel', stopHold);
+    }
+
+    setupHoldRepeat(stepperPlus, 1);
+    setupHoldRepeat(stepperMinus, -1);
 
     initializeTiles();
     scrambleTiles();
