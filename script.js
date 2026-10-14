@@ -135,15 +135,25 @@
       if (curveY[b] <= yb) { branchAt = b; break; }
     }
     var room = W - curveX[branchAt];
+    var rise = curveY[branchAt] - yTop;
+
+    // The main branch bends toward its ceiling, leaving the top edge about
+    // 60% of the way across the space to its right, clear of the steep branch.
+    var mainLen = rise * 1.1;
+    var mainTarget = curveX[branchAt] + room * 0.62;
+    var lo = 0.2, hi = Math.PI / 2;
+    for (var it = 0; it < 24; it++) {
+      var mid = (lo + hi) / 2;
+      var trial = steer(curveX, curveY, mid, mainLen);
+      if (trial.x[trial.x.length - 1] > mainTarget) lo = mid; else hi = mid;
+    }
+
     paths = [
-      makePath(curveX, curveY, curveN, null),
+      makePath(steer(curveX, curveY, (lo + hi) / 2, mainLen), false),
       // keeps steepening, straight up and out of frame
-      makePath(curveX, curveY, curveN, { turn: Math.PI / 2 - 0.05, len: H * 0.3 }),
+      makePath(steer(curveX, curveY, Math.PI / 2 - 0.03, rise * 0.25), true),
       // levels off early, then sags a little
-      makePath(curveX, curveY, curveN, {
-        turn: -0.11,
-        len: Math.max(70, Math.min(room * 1.5, H * 0.45))
-      })
+      makePath(steer(curveX, curveY, -0.11, Math.max(70, Math.min(room * 1.5, H * 0.45))), true)
     ];
 
     bucketLen = Math.max(1, Math.round((cell * 3) / SPACING));
@@ -154,33 +164,36 @@
     });
   }
 
-  // A path that follows the main curve up to branchAt, then (if `steer` is
-  // given) eases its heading toward steer.turn over steer.len px. Branches
-  // fade along their length; the main curve doesn't.
-  function makePath(xs, ys, count, steer) {
-    if (!steer) {
-      return { x: xs, y: ys, n: count, fade: new Float32Array(count).fill(1) };
-    }
+  // Follow the curve up to branchAt, then ease the heading toward `turn`
+  // (radians) over `len` px until leaving the screen.
+  function steer(xs, ys, turn, len) {
     var b = branchAt;
     var bx = Array.from(xs.subarray(0, b + 1));
     var by = Array.from(ys.subarray(0, b + 1));
     var th0 = Math.atan2(-(ys[b + 2] - ys[b - 2]), xs[b + 2] - xs[b - 2]);
     var x = xs[b], y = ys[b];
     for (var d = SPACING; d < 6000; d += SPACING) {
-      var u = Math.min(1, d / steer.len);
-      var th = th0 + (steer.turn - th0) * u * u * (3 - 2 * u);
+      var u = Math.min(1, d / len);
+      var th = th0 + (turn - th0) * u * u * (3 - 2 * u);
       x += Math.cos(th) * SPACING;
       y -= Math.sin(th) * SPACING;
       bx.push(x); by.push(y);
       if (y < -4 || x > W + 4 || y > H + 4) break;
     }
-    var n2 = bx.length;
-    var fade = new Float32Array(n2);
-    for (var k = 0; k < n2; k++) {
-      var v = Math.max(0, (k - b) / (n2 - 1 - b));
-      fade[k] = 1 - 0.7 * v * v * (3 - 2 * v);
+    return { x: bx, y: by };
+  }
+
+  // Side branches fade along their length; the main one doesn't.
+  function makePath(pts, fades) {
+    var n2 = pts.x.length;
+    var fade = new Float32Array(n2).fill(1);
+    if (fades) {
+      for (var k = branchAt; k < n2; k++) {
+        var v = (k - branchAt) / (n2 - 1 - branchAt);
+        fade[k] = 1 - 0.7 * v * v * (3 - 2 * v);
+      }
     }
-    return { x: Float32Array.from(bx), y: Float32Array.from(by), n: n2, fade: fade };
+    return { x: Float32Array.from(pts.x), y: Float32Array.from(pts.y), n: n2, fade: fade };
   }
 
   function buildBand() {
@@ -351,15 +364,16 @@
   }
 
   function sampleAtHeight(frac) {
-    var target = curveY[0] - frac * (curveY[0] - curveY[curveN - 1]);
-    for (var s = 0; s < curveN; s++) if (curveY[s] <= target) return s;
-    return curveN - 1;
+    var P = paths[0];
+    var target = P.y[0] - frac * (P.y[0] - P.y[P.n - 1]);
+    for (var s = 0; s < P.n; s++) if (P.y[s] <= target) return s;
+    return P.n - 1;
   }
 
   // Launch a glider from `dist` tiles away so that it runs into curve sample s.
   function launchToward(s, dist) {
-    var tx = Math.floor(curveX[s] / cell);
-    var ty = Math.floor(curveY[s] / cell);
+    var tx = Math.floor(paths[0].x[s] / cell);
+    var ty = Math.floor(paths[0].y[s] / cell);
     var dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
     dirs.sort(function () { return Math.random() - 0.5; });
     for (var k = 0; k < dirs.length; k++) {
