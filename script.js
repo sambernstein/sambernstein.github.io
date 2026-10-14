@@ -4,7 +4,9 @@
  * The curve is a generalized logistic (Richards) curve. What fits on screen is
  * mostly its exponential stretch: it climbs steeply and only begins to bend
  * toward its ceiling at the top edge. Two gentle grooves interrupt the climb,
- * places where progress briefly slows before resuming.
+ * places where progress briefly slows before resuming. Near the top it divides
+ * into three: one that keeps steepening, one that bends toward its ceiling,
+ * and one that rolls over. Only the second has light behind it.
  *
  * Whenever a cell is born within two tiles of the curve, the curve takes it
  * up and answers with a climb: a trail of new cells sparking up its length,
@@ -39,6 +41,8 @@
     { h: 0.12, w: 1.0, m: 2.2 },
     { h: 0.40, w: 0.9, m: 1.8 }
   ];
+  var BRANCH_H = 0.52;        // height (fraction of screen) where the curve divides
+  var CURVE_DIM = 0.88;       // overall strength of the curve and its pulses
 
   // ----- State -----
 
@@ -46,7 +50,8 @@
   var cur, nxt, prev, heat, heatNxt, vis;
   var band, nearest;
   var curveX, curveY, curveN = 0, bucketLen = 1;
-  var lastFire;
+  var paths = [], branchAt = 0;  // [main, steep, rollover]; all share the trunk up to branchAt
+  var nearestPath;
   var layer;
   var pulses = [], climbs = [];
   var hopSamples = 1, pulseSpeed = 300;
@@ -123,42 +128,103 @@
     curveY = Float32Array.from(ys);
     curveN = xs.length;
 
+    // Where it divides
+    var yb = yBase - BRANCH_H * (yBase - yTop);
+    branchAt = curveN - 1;
+    for (var b = 0; b < curveN; b++) {
+      if (curveY[b] <= yb) { branchAt = b; break; }
+    }
+    var room = W - curveX[branchAt];
+    paths = [
+      makePath(curveX, curveY, curveN, null),
+      // keeps steepening, straight up and out of frame
+      makePath(curveX, curveY, curveN, { turn: Math.PI / 2 - 0.05, len: H * 0.3 }),
+      // levels off early, then sags a little
+      makePath(curveX, curveY, curveN, {
+        turn: -0.11,
+        len: Math.max(70, Math.min(room * 1.5, H * 0.45))
+      })
+    ];
+
     bucketLen = Math.max(1, Math.round((cell * 3) / SPACING));
     hopSamples = Math.round((HOP * cell) / SPACING);
     pulseSpeed = (hopSamples * SPACING) / (STEP_MS / 1000);  // pulses keep pace with climbs
-    lastFire = new Int32Array(Math.ceil(curveN / bucketLen) + 1).fill(-1000);
+    paths.forEach(function (p) {
+      p.lastFire = new Int32Array(Math.ceil(p.n / bucketLen) + 1).fill(-1000);
+    });
+  }
+
+  // A path that follows the main curve up to branchAt, then (if `steer` is
+  // given) eases its heading toward steer.turn over steer.len px. Branches
+  // fade along their length; the main curve doesn't.
+  function makePath(xs, ys, count, steer) {
+    if (!steer) {
+      return { x: xs, y: ys, n: count, fade: new Float32Array(count).fill(1) };
+    }
+    var b = branchAt;
+    var bx = Array.from(xs.subarray(0, b + 1));
+    var by = Array.from(ys.subarray(0, b + 1));
+    var th0 = Math.atan2(-(ys[b + 2] - ys[b - 2]), xs[b + 2] - xs[b - 2]);
+    var x = xs[b], y = ys[b];
+    for (var d = SPACING; d < 6000; d += SPACING) {
+      var u = Math.min(1, d / steer.len);
+      var th = th0 + (steer.turn - th0) * u * u * (3 - 2 * u);
+      x += Math.cos(th) * SPACING;
+      y -= Math.sin(th) * SPACING;
+      bx.push(x); by.push(y);
+      if (y < -4 || x > W + 4 || y > H + 4) break;
+    }
+    var n2 = bx.length;
+    var fade = new Float32Array(n2);
+    for (var k = 0; k < n2; k++) {
+      var v = Math.max(0, (k - b) / (n2 - 1 - b));
+      fade[k] = 1 - 0.7 * v * v * (3 - 2 * v);
+    }
+    return { x: Float32Array.from(bx), y: Float32Array.from(by), n: n2, fade: fade };
   }
 
   function buildBand() {
     band = new Uint8Array(n).fill(255);
     nearest = new Int32Array(n).fill(-1);
-    for (var s = 0; s < curveN; s++) {
-      var cx = Math.floor(curveX[s] / cell);
-      var cy = Math.floor(curveY[s] / cell);
-      for (var dy = -BAND; dy <= BAND; dy++) {
-        var gy = cy + dy;
-        if (gy < 0 || gy >= rows) continue;
-        for (var dx = -BAND; dx <= BAND; dx++) {
-          var gx = cx + dx;
-          if (gx < 0 || gx >= cols) continue;
-          var d = Math.max(Math.abs(dx), Math.abs(dy));
-          var i = gy * cols + gx;
-          if (d < band[i] || (d === band[i] && s > nearest[i])) {
-            band[i] = d;
-            nearest[i] = s;
-          }
+    nearestPath = new Uint8Array(n);
+    for (var p = 0; p < paths.length; p++) {
+      // Branches only need their own samples; the trunk is covered by path 0.
+      for (var s = p === 0 ? 0 : branchAt + 1; s < paths[p].n; s++) {
+        markBand(p, s);
+      }
+    }
+  }
+
+  function markBand(p, s) {
+    var cx = Math.floor(paths[p].x[s] / cell);
+    var cy = Math.floor(paths[p].y[s] / cell);
+    for (var dy = -BAND; dy <= BAND; dy++) {
+      var gy = cy + dy;
+      if (gy < 0 || gy >= rows) continue;
+      for (var dx = -BAND; dx <= BAND; dx++) {
+        var gx = cx + dx;
+        if (gx < 0 || gx >= cols) continue;
+        var d = Math.max(Math.abs(dx), Math.abs(dy));
+        var i = gy * cols + gx;
+        if (d < band[i] || (d === band[i] && p === nearestPath[i] && s > nearest[i])) {
+          band[i] = d;
+          nearest[i] = s;
+          nearestPath[i] = p;
         }
       }
     }
   }
 
-  // Static layer: faint lattice, the area under the curve, and the curve itself.
+  // Static layer: faint lattice, the light behind the main branch, the area
+  // under the curve, and the curve itself.
   function renderLayer() {
     layer = document.createElement('canvas');
     layer.width = Math.round(W * dpr);
     layer.height = Math.round(H * dpr);
     var g = layer.getContext('2d');
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var k = CURVE_DIM;
+    var main = paths[0];
 
     // Lattice points at cell corners
     g.fillStyle = 'rgba(167, 243, 208, 0.045)';
@@ -168,39 +234,74 @@
       }
     }
 
-    function tracePath() {
+    // A faint dawn just beyond where the main branch leaves the frame.
+    var ex = main.x[main.n - 1];
+    var rx = Math.max(80, Math.min(W * 0.11, 210));
+    var ry = H * 0.42;
+    g.save();
+    g.translate(ex + rx * 0.6, -H * 0.04);
+    g.scale(1, ry / rx);
+    var dawn = g.createRadialGradient(0, 0, 0, 0, 0, rx);
+    dawn.addColorStop(0, 'rgba(238, 228, 200, 0.085)');
+    dawn.addColorStop(0.4, 'rgba(226, 232, 206, 0.04)');
+    dawn.addColorStop(1, 'rgba(210, 236, 214, 0)');
+    g.fillStyle = dawn;
+    g.fillRect(-rx, -rx, rx * 2, rx * 2);
+    g.restore();
+
+    function trace(P, from) {
       g.beginPath();
-      g.moveTo(curveX[0], curveY[0]);
-      for (var s = 1; s < curveN; s++) g.lineTo(curveX[s], curveY[s]);
+      g.moveTo(P.x[from], P.y[from]);
+      for (var s = from + 1; s < P.n; s++) g.lineTo(P.x[s], P.y[s]);
     }
 
-    // Area under the curve
-    tracePath();
-    g.lineTo(curveX[curveN - 1] + W, curveY[curveN - 1]);
+    // Area under the main curve
+    trace(main, 0);
+    g.lineTo(main.x[main.n - 1] + W, main.y[main.n - 1]);
     g.lineTo(W + 10, H + 10);
-    g.lineTo(curveX[0], H + 10);
+    g.lineTo(main.x[0], H + 10);
     g.closePath();
     var fill = g.createLinearGradient(0, 0, 0, H);
-    fill.addColorStop(0, 'rgba(110, 231, 183, 0.045)');
-    fill.addColorStop(1, 'rgba(110, 231, 183, 0.0)');
+    fill.addColorStop(0, 'rgba(110, 231, 183, ' + (0.045 * k) + ')');
+    fill.addColorStop(1, 'rgba(110, 231, 183, 0)');
     g.fillStyle = fill;
     g.fill();
 
-    // Stroke: emerald at the base, paler toward the top, warming slightly
-    // where it starts to bend.
-    var stroke = g.createLinearGradient(0, H, 0, 0);
-    stroke.addColorStop(0, 'rgba(52, 211, 153, 0.22)');
-    stroke.addColorStop(0.55, 'rgba(110, 231, 183, 0.42)');
-    stroke.addColorStop(0.85, 'rgba(190, 242, 214, 0.55)');
-    stroke.addColorStop(1, 'rgba(236, 226, 196, 0.62)');
-
     g.lineJoin = 'round';
     g.lineCap = 'round';
-    tracePath();
-    g.strokeStyle = 'rgba(52, 211, 153, 0.05)';
+
+    // Branches first, so the main line sits on top where they part. Each takes
+    // its own hue as it leaves: the steep one cooler, the other greyer.
+    var hues = [null, [150, 214, 226], [132, 160, 148]];
+    for (var p = 1; p < paths.length; p++) {
+      var P = paths[p], b = Math.max(0, branchAt - 1), end = P.n - 1;
+      var c = hues[p].join(', ');
+      var grad = g.createLinearGradient(P.x[b], P.y[b], P.x[end], P.y[end]);
+      grad.addColorStop(0, 'rgba(110, 231, 183, ' + (0.41 * k) + ')');
+      grad.addColorStop(0.35, 'rgba(' + c + ', ' + (0.34 * k) + ')');
+      grad.addColorStop(1, 'rgba(' + c + ', ' + (0.12 * k) + ')');
+      trace(P, b);
+      g.strokeStyle = 'rgba(110, 231, 183, ' + (0.035 * k) + ')';
+      g.lineWidth = 7;
+      g.stroke();
+      g.strokeStyle = grad;
+      g.lineWidth = 1.1;
+      g.stroke();
+    }
+
+    // Main curve: emerald at the base, paler toward the top, warming slightly
+    // where it starts to bend.
+    var stroke = g.createLinearGradient(0, H, 0, 0);
+    stroke.addColorStop(0, 'rgba(52, 211, 153, ' + (0.22 * k) + ')');
+    stroke.addColorStop(0.55, 'rgba(110, 231, 183, ' + (0.42 * k) + ')');
+    stroke.addColorStop(0.85, 'rgba(190, 242, 214, ' + (0.55 * k) + ')');
+    stroke.addColorStop(1, 'rgba(240, 228, 196, ' + (0.62 * k) + ')');
+
+    trace(main, 0);
+    g.strokeStyle = 'rgba(52, 211, 153, ' + (0.05 * k) + ')';
     g.lineWidth = 9;
     g.stroke();
-    g.strokeStyle = 'rgba(110, 231, 183, 0.07)';
+    g.strokeStyle = 'rgba(110, 231, 183, ' + (0.07 * k) + ')';
     g.lineWidth = 3.5;
     g.stroke();
     g.strokeStyle = stroke;
@@ -272,11 +373,11 @@
     return false;
   }
 
-  // A spark on the curve at sample s: three cells on a diagonal through it.
+  // A spark on path p at sample s: three cells on a diagonal through it.
   // Under Life's rules it flares for a generation or two and leaves nothing.
-  function spark(s) {
-    var cx = Math.floor(curveX[s] / cell);
-    var cy = Math.floor(curveY[s] / cell);
+  function spark(p, s) {
+    var cx = Math.floor(paths[p].x[s] / cell);
+    var cy = Math.floor(paths[p].y[s] / cell);
     var d = Math.random() < 0.5 ? 1 : -1;
     for (var k = -1; k <= 1; k++) {
       var x = cx + k, y = cy + k * d;
@@ -300,9 +401,9 @@
     }
   }
 
-  function addPulse(s, strength) {
+  function addPulse(p, s, strength) {
     if (pulses.length >= MAX_PULSES) pulses.shift();
-    pulses.push({ pos: s, life: strength });
+    pulses.push({ path: p, pos: s, life: strength });
   }
 
   // ----- Evolution -----
@@ -356,24 +457,28 @@
       absorb(ti);
       lastTriggerGen = generation;
       var s = nearest[ti];
+      var p = nearestPath[ti];
+      var lastFire = paths[p].lastFire;
       var b = Math.floor(s / bucketLen);
       if (generation - lastFire[b] < COOLDOWN || climbs.length >= MAX_CLIMBS) continue;
       for (var bb = Math.max(0, b - 2); bb <= Math.min(lastFire.length - 1, b + 2); bb++) {
         lastFire[bb] = generation;
       }
-      climbs.push({ pos: s, hops: CLIMB_MIN + Math.floor(Math.random() * CLIMB_VAR) });
-      addPulse(s, 1);
+      // Below the divide, which future a climb follows is left to chance.
+      if (s < branchAt) p = Math.floor(Math.random() * paths.length);
+      climbs.push({ path: p, pos: s, hops: CLIMB_MIN + Math.floor(Math.random() * CLIMB_VAR) });
+      addPulse(p, s, 1);
     }
 
     // Climbs leave a trail of sparks up the curve, then burn out.
     for (var c = climbs.length - 1; c >= 0; c--) {
       var cl = climbs[c];
       cl.pos += hopSamples;
-      if (cl.pos >= curveN || --cl.hops < 0) {
+      if (cl.pos >= paths[cl.path].n || --cl.hops < 0) {
         climbs.splice(c, 1);
         continue;
       }
-      spark(cl.pos);
+      spark(cl.path, cl.pos);
     }
 
     // When things go quiet, send something toward the curve.
@@ -422,23 +527,24 @@
       var tail = PULSE_TAIL / SPACING;
       for (var p = pulses.length - 1; p >= 0; p--) {
         var pu = pulses[p];
+        var P = paths[pu.path];
         pu.pos += advance;
         pu.life -= dt / 2600;
-        if (pu.life <= 0 || pu.pos - tail >= curveN) {
+        if (pu.life <= 0 || pu.pos - tail >= P.n) {
           pulses.splice(p, 1);
           continue;
         }
-        var head = Math.min(Math.floor(pu.pos), curveN - 1);
+        var head = Math.min(Math.floor(pu.pos), P.n - 1);
         var start = Math.max(0, Math.floor(pu.pos - tail));
         for (var s = start; s < head; s++) {
           var u = (s - (pu.pos - tail)) / tail;
-          var al = pu.life * u * u * 0.85;
+          var al = pu.life * u * u * 0.85 * CURVE_DIM * P.fade[s];
           if (al < 0.01) continue;
           ctx.strokeStyle = 'rgba(190, 255, 225, ' + al.toFixed(3) + ')';
           ctx.lineWidth = 1.2 + 1.6 * u;
           ctx.beginPath();
-          ctx.moveTo(curveX[s], curveY[s]);
-          ctx.lineTo(curveX[s + 1], curveY[s + 1]);
+          ctx.moveTo(P.x[s], P.y[s]);
+          ctx.lineTo(P.x[s + 1], P.y[s + 1]);
           ctx.stroke();
         }
       }
@@ -486,13 +592,16 @@
     var gx = Math.floor(e.clientX / cell);
     var gy = Math.floor(e.clientY / cell);
     // Aim the new glider at the nearest point on the curve.
-    var best = 0, bestD = Infinity;
-    for (var s = 0; s < curveN; s += 2) {
-      var dd = (curveX[s] - e.clientX) * (curveX[s] - e.clientX) + (curveY[s] - e.clientY) * (curveY[s] - e.clientY);
-      if (dd < bestD) { bestD = dd; best = s; }
+    var bx = 0, by = 0, bestD = Infinity;
+    for (var p = 0; p < paths.length; p++) {
+      var P = paths[p];
+      for (var s = 0; s < P.n; s += 2) {
+        var dd = (P.x[s] - e.clientX) * (P.x[s] - e.clientX) + (P.y[s] - e.clientY) * (P.y[s] - e.clientY);
+        if (dd < bestD) { bestD = dd; bx = P.x[s]; by = P.y[s]; }
+      }
     }
-    var dx = curveX[best] >= e.clientX ? 1 : -1;
-    var dy = curveY[best] >= e.clientY ? 1 : -1;
+    var dx = bx >= e.clientX ? 1 : -1;
+    var dy = by >= e.clientY ? 1 : -1;
     placeGlider(gx, gy, dx, dy, 0.6);
   }
 
