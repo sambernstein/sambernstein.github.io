@@ -161,38 +161,12 @@ header h1 {
   max-width: 40ch;
 }
 
-/* An invitation, set apart from the bio so it gets read. The cell echoes the
-   live ones in the background. */
+/* An invitation, set apart from the bio so it gets read: its own paragraph,
+   a shade brighter. */
 .bio p.invite {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-top: 18px;
-  color: var(--ink);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  text-wrap: balance;
-}
-
-.invite .cell {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  margin-top: 0.6em;
-  border-radius: 1px;
-  background: var(--accent);
-  box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .invite .cell {
-    animation: pulse 2.8s ease-in-out infinite;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  margin-top: 16px;
+  color: #c4d0ca;
+  text-wrap: pretty;
 }
 
 /* ===== Section Headings ===== */
@@ -414,8 +388,7 @@ h2::after {
   }
 
   .bio p.invite {
-    margin-top: 14px;
-    font-size: 0.9rem;
+    margin-top: 12px;
   }
 
   .connect {

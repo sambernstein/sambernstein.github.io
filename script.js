@@ -249,14 +249,14 @@
 
     // A faint dawn just beyond where the main branch leaves the frame.
     var ex = main.x[main.n - 1];
-    var rx = Math.max(80, Math.min(W * 0.11, 210));
+    var rx = Math.max(90, Math.min(W * 0.13, 250));
     var ry = H * 0.42;
     g.save();
     g.translate(ex + rx * 0.6, -H * 0.04);
     g.scale(1, ry / rx);
     var dawn = g.createRadialGradient(0, 0, 0, 0, 0, rx);
-    dawn.addColorStop(0, 'rgba(238, 228, 200, 0.085)');
-    dawn.addColorStop(0.4, 'rgba(226, 232, 206, 0.04)');
+    dawn.addColorStop(0, 'rgba(240, 231, 205, 0.15)');
+    dawn.addColorStop(0.4, 'rgba(228, 233, 208, 0.07)');
     dawn.addColorStop(1, 'rgba(210, 236, 214, 0)');
     g.fillStyle = dawn;
     g.fillRect(-rx, -rx, rx * 2, rx * 2);
