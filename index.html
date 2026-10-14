@@ -2,33 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Sam Bernstein — AI Researcher</title>
+  <meta name="description" content="Sam Bernstein — Senior AI Researcher at Rhino.ai.">
+  <meta name="theme-color" content="#060a09">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <canvas id="golCanvas"></canvas>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
 
-  <div class="container">
+  <main class="container">
 
     <div class="col-left">
       <header>
+        <img id="me" src="me-pic.jpg" alt="Sam Bernstein">
         <h1>Sam Bernstein</h1>
         <p class="tagline">Senior AI Researcher at <a href="http://rhino.ai/">Rhino.ai</a></p>
       </header>
 
       <section class="bio">
-        <img id="me" src="me-pic.jpg" alt="Sam Bernstein">
         <p>I like solving hard problems, biohacking, and waxing poetic about the nature of reality. Check out some of my projects, or click around on the background and see what we can build together.</p>
       </section>
 
       <section class="connect">
         <h2>Connect</h2>
         <div class="connect-links">
-          <a class="pill" href="https://github.com/sambernstein">GitHub</a>
-          <a class="pill" href="https://www.linkedin.com/in/sambernstein1">LinkedIn</a>
+          <a class="pill" href="https://github.com/sambernstein">GitHub <span class="arrow" aria-hidden="true">↗</span></a>
+          <a class="pill" href="https://www.linkedin.com/in/sambernstein1">LinkedIn <span class="arrow" aria-hidden="true">↗</span></a>
         </div>
       </section>
     </div>
@@ -37,26 +42,39 @@
       <h2>Projects</h2>
       <div class="card-grid">
         <a class="card" href="https://sambernstein.github.io/shufflescape-game">
+          <span class="card-index">01</span>
           <span class="card-title">Shufflescape</span>
+          <span class="arrow" aria-hidden="true">↗</span>
         </a>
         <a class="card" href="https://sambernstein.github.io/chgrid.html">
+          <span class="card-index">02</span>
           <span class="card-title">Turn Them Green</span>
+          <span class="arrow" aria-hidden="true">↗</span>
         </a>
         <a class="card" href="https://sambernstein.github.io/build_inspiration.html">
+          <span class="card-index">03</span>
           <span class="card-title">Build Inspiration</span>
+          <span class="arrow" aria-hidden="true">↗</span>
         </a>
         <a class="card" href="https://github.com/sambernstein/Shapeshifting-Geese">
+          <span class="card-index">04</span>
           <span class="card-title">Shapeshifting Geese</span>
+          <span class="arrow" aria-hidden="true">↗</span>
         </a>
         <a class="card" href="https://sambernstein.github.io/kindness.html">
+          <span class="card-index">05</span>
           <span class="card-title">Random Act of Kindness</span>
+          <span class="arrow" aria-hidden="true">↗</span>
         </a>
       </div>
     </section>
 
-  </div>
+    <footer class="caption">
+      <span>Fig. 1</span> Logistic growth, seen from below the bend. Conway's Game of Life underneath — click anywhere to seed it.
+    </footer>
 
-  <script src="https://code.jquery.com/jquery-1.10.0.min.js"></script>
+  </main>
+
   <script src="./script.js"></script>
 
 </body>
