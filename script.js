@@ -523,8 +523,8 @@
       vis[i] = v;
       if (v === 0) continue;
       var h = heat[i];
-      var r = 38 + 120 * h, gr = 150 + 95 * h, bl = 112 + 95 * h;
-      var a = v * (0.26 + 0.3 * h);
+      var r = 38 + 95 * h, gr = 150 + 75 * h, bl = 112 + 78 * h;
+      var a = v * (0.2 + 0.22 * h);
       ctx.fillStyle = 'rgba(' + (r | 0) + ',' + (gr | 0) + ',' + (bl | 0) + ',' + a.toFixed(3) + ')';
       ctx.fillRect((i % cols) * cell + inset, ((i / cols) | 0) * cell + inset, size, size);
     }
@@ -552,10 +552,10 @@
         var start = Math.max(0, Math.floor(pu.pos - tail));
         for (var s = start; s < head; s++) {
           var u = (s - (pu.pos - tail)) / tail;
-          var al = pu.life * u * u * 0.85 * CURVE_DIM * P.fade[s];
+          var al = pu.life * u * u * 0.6 * CURVE_DIM * P.fade[s];
           if (al < 0.01) continue;
           ctx.strokeStyle = 'rgba(190, 255, 225, ' + al.toFixed(3) + ')';
-          ctx.lineWidth = 1.2 + 1.6 * u;
+          ctx.lineWidth = 1.1 + 1.2 * u;
           ctx.beginPath();
           ctx.moveTo(P.x[s], P.y[s]);
           ctx.lineTo(P.x[s + 1], P.y[s + 1]);
